@@ -8,8 +8,9 @@
 	<script type="text/javascript">
 	var infowindow;
 	var marker;
+  var gmarkers = [];
 	
-	function getLocation() {
+  function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(load);
     } else {
@@ -47,6 +48,9 @@
       },
 	  fig: {
         icon: 'images/fig-icon.png'
+      },
+	  mandarin: {
+        icon: 'images/mandarin-icon.png'
       }
 //	  blackberry: {
 //        icon: 'images/blackberry-icon.png'
@@ -55,8 +59,47 @@
 
     function load(position) {
 	  console.log(position);
+    
+    console.log("Loading position...");
+    console.log(position);
 	  var myLatLng = {lat: position.coords.latitude, lng: position.coords.longitude};
 
+      function CenterControl(controlDiv, map) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.margin = '10px';
+//        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to recenter the map';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '12px';
+        controlText.style.lineHeight = '20px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = 'Center map';
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+        controlUI.addEventListener('click', function() {
+          map.setCenter(myLatLng);
+        });
+
+      }
+
+
+
+    console.log("Create new map...");
       var map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
         zoom: 18,
@@ -81,24 +124,38 @@
 		"<option value='avocado'>avocado</option>" +	
 		"<option value='plum'>plum</option>" +		
 		"<option value='peach'>peach</option>" +		
-		"<option value='fig'>fig</option>" +				
+		"<option value='fig'>fig</option>" +			
+		"<option value='mandarin'>mandarin</option>" +			
 		 "</select> </td></tr>" +
-		 "<tr><td></td><td><input type='button' value='Save & Close' onclick='saveData()'/></td></tr>";
+		 "<tr><td></td><td><input type='button' value='Save & Close' onclick='saveData()'/></td><td><input type='button' value='Delete' onclick='deleteData()'/></td></tr>";
     infowindow = new google.maps.InfoWindow({
      content: html
     });
 
 	  map.setTilt(0);
-	  
-//	var marker = new google.maps.Marker({
-//		position: myLatLng,
-//		map: map,
-//		title: 'Current location',
-//		label: '',
-//		icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png'
-//	});
-//	  console.log(map);
+	
+        var centerControlDiv = document.createElement('div');
+        var centerControl = new CenterControl(centerControlDiv, map);
+
+        centerControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(centerControlDiv);
+  
+  console.log("Set marker for current location at " + position.coords.latitude + ", " + position.coords.longitude);  
+  var marker = new google.maps.Marker({
+		position: myLatLng,
+		map: map,
+		title: 'Current location',
+		label: '',
+		icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png'
+	});
+//    bindInfoWindow(marker, map, infoWindow, "<b>Current location</b><br/>" + lat + ", " + lng);
+	  console.log(map);
+    
+//  gmarkers.push(marker);
 	  	  
+//    console.log("Bind info window");
+//    bindInfoWindow(marker, map, infoWindow, html); 
+    
 //	    // This event listener calls addMarker() when the map is clicked.
 //  google.maps.event.addListener(map, 'click', function(event) {
 //           infowindow.open(map, marker);
@@ -108,12 +165,20 @@
     google.maps.event.addListener(map, "click", function(event) {
         marker = new google.maps.Marker({
           position: event.latLng,
-          map: map
+          map: map,
+          icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png'
         });
         google.maps.event.addListener(marker, "click", function() {
           infowindow.open(map, marker);
         });
+        console.log(marker.position.lat() + ", " + marker.position.lng());
+        gmarkers.push(marker);
+//        console.log("Print gmarkers array");
+//        console.log(gmarkers);
     });
+    
+//  gmarkers.push(marker);
+//  console.log(gmarkers);
 
 }
         function timeDelay() {
@@ -129,10 +194,20 @@
       var name = escape(document.getElementById("name").value);
       var address = escape(document.getElementById("address").value);
       var type = document.getElementById("type").value;
-      var latlng = marker.getPosition();
+
+//      console.log(gmarkers);
+     var lastValue = gmarkers.length - 1;
+      console.log("Save last marker");
+//      gmarkers[lastValue].position();
+
+
+
+      var latlng = gmarkers[lastValue].getPosition();
 
       var url = "addrecord.php?name=" + name + "&address=" + address +
                 "&type=" + type + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
+
+      
       downloadUrl(url, function(data, responseCode) {
         if (responseCode == 200) {
           infowindow.close();
@@ -140,6 +215,12 @@
 		  timeDelay();
 		  }
       });
+    }
+    
+    function deleteData() {
+      var lastValue = gmarkers.length - 1;
+      console.log("Delete last marker");
+      gmarkers[lastValue].setMap(null);
     }
 
 	    function downloadUrl(url, callback) {
@@ -156,8 +237,8 @@
 
       request.open('GET', url, true);
       request.send(null);
-    }
-	
+    }  
+  
     function doNothing() {}
 
   </script>
@@ -165,7 +246,7 @@
   </head>
 
   <body onload="getLocation()">
-    <div id="map" style="width: 360px; height: 500px"></div>
+	<div style="width:500px; height:500px" id="map"></div>
     <button onclick="window.location.href='index.html'">Go back</button>
 	<div id="message"></div>
   </body>
