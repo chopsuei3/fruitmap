@@ -5,11 +5,17 @@
     <title>FruitMap Fruit Tree Mapper</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAS6leX7t066ObvmuqZzbfOnyiVO-t1xy4"
             type="text/javascript"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript">
 	var infowindow;
 	var marker;
   var gmarkers = [];
 	
+   function toTitleCase(str)
+  {
+      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+  } 
+    
   function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(load);
@@ -19,49 +25,110 @@
 	}
 		
     var customIcons = {
-      cauliflower: {
-        icon: 'images/cauliflower-icon.png'
-      },
       orange: {
         icon: 'images/orange-icon.png'
       },
-	  apple: {
+    apple: {
         icon: 'images/apple-icon.png'
       },
-	  lemon: {
+    lemon: {
         icon: 'images/lemon-icon.png'
       },
-	  lime: {
+    lime: {
         icon: 'images/lime-icon.png'
       },
-	  blackberry: {
+    blackberry: {
         icon: 'images/blackberry-icon.png'
       },
-	  avocado: {
+    avocado: {
         icon: 'images/avocado-icon.png'
       },
-	  plum: {
+    plum: {
         icon: 'images/plum-icon.png'
       },
-	  peach: {
+    peach: {
         icon: 'images/peach-icon.png'
       },
-	  fig: {
+    fig: {
         icon: 'images/fig-icon.png'
       },
-	  mandarin: {
+    mandarin: {
         icon: 'images/mandarin-icon.png'
+      },
+    apricot: {
+        icon: 'images/apricot-icon.png'
+      },
+    banana: {
+        icon: 'images/banana-icon.png'
+      },
+    blueberry: {
+        icon: 'images/blueberry-icon.png'
+      },
+    cherry: {
+        icon: 'images/cherry-icon.png'
+      },
+    grape: {
+        icon: 'images/grape-icon.png'
+      },
+    grapefruit: {
+        icon: 'images/grapefruit-icon.png'
+      },
+    guava: {
+        icon: 'images/guava-icon.png'
+      },
+    kiwi: {
+        icon: 'images/kiwi-icon.png'
+      },
+    mango: {
+        icon: 'images/mango-icon.png'
+      },
+    olive: {
+        icon: 'images/olive-icon.png'
+      },
+    pear: {
+        icon: 'images/pear-icon.png'
+      },
+    raspberry: {
+        icon: 'images/raspberry-icon.png'
+      },
+    strawberry: {
+        icon: 'images/strawberry-icon.png'
+      },
+    pomegranite: {
+        icon: 'images/pomegranite-icon.png'
       }
-//	  blackberry: {
-//        icon: 'images/blackberry-icon.png'
-//      }	  
     };
+    
+   var centerMeIcon = 'images/findme.png';
+   var goBackIcon = 'images/goback.png';
+    
+   var fruitArray = []; 
+    
+   $.each(customIcons, function(key, value) {   
+//      // console.log(key);
+      fruitArray.push(key);
+    });    
+    
+    var keyHtml = "";
+    var capitalizedString = "";
+    
+    $.each(fruitArray.sort(), function(key, value) {   
+//        // console.log("Key = " + key + "\nValue = " + value + "\n");
+         $('#type')
+              capitalizedString = toTitleCase(value);
+              keyHtml = keyHtml + "<option>" + capitalizedString + "</option>\n";
+//             .append($("<option>" + key + "</option>")
+//                        .attr("value",key)
+//                        .text(value)); 
+    });
+    
+    console.log(keyHtml);
 
     function load(position) {
-	  console.log(position);
+	  // console.log(position);
     
-    console.log("Loading position...");
-    console.log(position);
+    // console.log("Loading position...");
+    // console.log(position);
 	  var myLatLng = {lat: position.coords.latitude, lng: position.coords.longitude};
 
       function CenterControl(controlDiv, map) {
@@ -87,7 +154,7 @@
         controlText.style.lineHeight = '20px';
         controlText.style.paddingLeft = '5px';
         controlText.style.paddingRight = '5px';
-        controlText.innerHTML = 'Center map';
+        controlText.innerHTML = "<img style='vertical-align:middle' src='" + centerMeIcon + "'>Center map";
         controlUI.appendChild(controlText);
 
         // Setup the click event listeners: simply set the map to Chicago.
@@ -97,12 +164,45 @@
 
       }
 
+      function MapControl(controlDiv, map) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.margin = '10px';
+//        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to go back';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '12px';
+        controlText.style.lineHeight = '20px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = "<img style='vertical-align:middle' src='" + goBackIcon + "'>Go back";
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+        controlUI.addEventListener('click', function() {
+            location.href = "index.html";
+//          map.setCenter(myLatLng);
+        });
+
+      }
 
 
-    console.log("Create new map...");
+    // console.log("Create new map...");
       var map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        zoom: 18,
+        zoom: 20,
         mapTypeId: 'satellite',
 	    disableDefaultUI: true,
 		zoomControl: true,
@@ -112,20 +212,10 @@
 		rotateControl: false
       });
 	  var html = "<table>" +
-		"<tr><td>Name:</td> <td><input type='text' id='name'/> </td> </tr>" +
-		"<tr><td>Address:</td> <td><input type='text' id='address'/></td> </tr>" +
-		"<tr><td>Type:</td> <td><select id='type'>" +
-		"<option value='apple' SELECTED>apple</option>" +
-		"<option value='blackberry'>blackberry</option>" +
-		"<option value='lemon'>lemon</option>" +
-		"<option value='lime'>lime</option>" +
-		"<option value='orange'>orange</option>" +
-		"<option value='cauliflower'>cauliflower</option>" +
-		"<option value='avocado'>avocado</option>" +	
-		"<option value='plum'>plum</option>" +		
-		"<option value='peach'>peach</option>" +		
-		"<option value='fig'>fig</option>" +			
-		"<option value='mandarin'>mandarin</option>" +			
+		"<tr><td>Description</td> <td><input type='text' id='name'/> </td> </tr>" +
+		"<tr><td>Location</td> <td><input type='text' id='address'/></td> </tr>" +
+		"<tr><td>Type</td> <td><select id='type'>" +
+    keyHtml +
 		 "</select> </td></tr>" +
 		 "<tr><td></td><td><input type='button' value='Save & Close' onclick='saveData()'/></td><td><input type='button' value='Delete' onclick='deleteData()'/></td></tr>";
     infowindow = new google.maps.InfoWindow({
@@ -138,9 +228,16 @@
         var centerControl = new CenterControl(centerControlDiv, map);
 
         centerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(centerControlDiv);
+        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(centerControlDiv);
   
-  console.log("Set marker for current location at " + position.coords.latitude + ", " + position.coords.longitude);  
+        var mapControlDiv = document.createElement('div');
+        var mapControl = new MapControl(mapControlDiv, map);
+
+        mapControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(mapControlDiv);      
+  
+  
+  // console.log("Set marker for current location at " + position.coords.latitude + ", " + position.coords.longitude);  
   var marker = new google.maps.Marker({
 		position: myLatLng,
 		map: map,
@@ -148,12 +245,63 @@
 		label: '',
 		icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png'
 	});
+
+//    google.maps.event.addListener(marker, 'click', function() {
+      // console.log("Add marker");
+//      infowindow.setContent("<b>Current location</b><br/>");
+//      infowindow.open(map, marker);
+//    });
+//  bindInfoWindow(marker, map, infowindow, "<b>Current location</b><br/>");
+  
+// Display existing markers
+      downloadUrl("locationstoxml.php", function(data) {
+        var xml = data.responseXML;
+        console.log(xml);
+        var markers = xml.documentElement.getElementsByTagName("marker");
+        for (var i = 0; i < markers.length; i++) {
+          var name = markers[i].getAttribute("name");
+          var address = markers[i].getAttribute("address");
+          var type = markers[i].getAttribute("type");
+          var capType = toTitleCase(type);
+          var lat = markers[i].getAttribute("lat");
+          var lng = markers[i].getAttribute("lng");
+          var icon = customIcons[type] || {};
+          // console.log("Location: " + i + "    " + name + "    " + lat + ", " + lng);
+          // console.log(icon);
+          var point = new google.maps.LatLng(
+              parseFloat(lat),
+              parseFloat(lng));
+//          var html = "<b>" + name + "</b> <br/>" + address + "<br/><input type='button' value='Delete entry' onclick='deleteData(deleteRecord)'/>";
+          var htmlxml = "<table><tr><td><b>Description</b></td><td>" + name + "</td></tr><tr><td><b>Fruit Type</b></td><td>" + capType + "</td><td><img src='" + icon.icon + "' ></td></tr><tr><td><b>Location</b></td><td>" + address + "</td></tr></table>";
+
+          
+          // console.log("Create marker " + i);
+          var marker = new google.maps.Marker({
+            map: map,
+            position: point,
+            icon: icon.icon
+          });
+//          bindInfoWindow(marker, map, infoWindow, html, deleteRecord);
+          // console.log("Bind info window");
+         // bindInfoWindow(marker, map, infoWindow, html);
+         
+          google.maps.event.addListener(marker, 'click', function() {
+          // console.log("Add marker");
+          infoWindow.setContent(htmlxml);
+          infoWindow.open(map, marker);
+      });
+
+        }
+      });
+      
+  
+  
 //    bindInfoWindow(marker, map, infoWindow, "<b>Current location</b><br/>" + lat + ", " + lng);
-	  console.log(map);
+	  // console.log(map);
     
 //  gmarkers.push(marker);
 	  	  
-//    console.log("Bind info window");
+//    // console.log("Bind info window");
 //    bindInfoWindow(marker, map, infoWindow, html); 
     
 //	    // This event listener calls addMarker() when the map is clicked.
@@ -169,19 +317,20 @@
           icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png'
         });
         google.maps.event.addListener(marker, "click", function() {
+          infowindow.setContent(html);
           infowindow.open(map, marker);
         });
-        console.log(marker.position.lat() + ", " + marker.position.lng());
+        // console.log(marker.position.lat() + ", " + marker.position.lng());
         gmarkers.push(marker);
-//        console.log("Print gmarkers array");
-//        console.log(gmarkers);
+//        // console.log("Print gmarkers array");
+//        // console.log(gmarkers);
     });
     
 //  gmarkers.push(marker);
-//  console.log(gmarkers);
+//  // console.log(gmarkers);
 
 }
-        function timeDelay() {
+    function timeDelay() {
 		  window.setTimeout(redirectToMap,1000);
 		}
 
@@ -190,24 +339,29 @@
 		}
 
 
+/*    function bindInfoWindow(marker, map, infowindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        // console.log("Add marker");
+        infowindow.setContent(html);
+        infowindow.open(map, marker);
+      });
+    }
+*/
     function saveData() {
       var name = escape(document.getElementById("name").value);
       var address = escape(document.getElementById("address").value);
       var type = document.getElementById("type").value;
 
-//      console.log(gmarkers);
+//      // console.log(gmarkers);
      var lastValue = gmarkers.length - 1;
-      console.log("Save last marker");
+      // console.log("Save last marker");
 //      gmarkers[lastValue].position();
-
-
 
       var latlng = gmarkers[lastValue].getPosition();
 
       var url = "addrecord.php?name=" + name + "&address=" + address +
                 "&type=" + type + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
-
-      
+  
       downloadUrl(url, function(data, responseCode) {
         if (responseCode == 200) {
           infowindow.close();
@@ -219,7 +373,7 @@
     
     function deleteData() {
       var lastValue = gmarkers.length - 1;
-      console.log("Delete last marker");
+      // console.log("Delete last marker");
       gmarkers[lastValue].setMap(null);
     }
 
@@ -243,12 +397,20 @@
 
   </script>
 
+    <style type="text/css">
+
+      html,body { height: 99%; margin: 0px; padding: 5px; }
+      #map { height: 99% }
+
+    </style>
+
   </head>
 
   <body onload="getLocation()">
-	<div style="width:500px; height:500px" id="map"></div>
+	<div id="map"></div>
+<!--  <div style="width:500px; height:500px" id="map"></div>
     <button onclick="window.location.href='index.html'">Go back</button>
-	<div id="message"></div>
+	<div id="message"></div>-->
   </body>
 
 </html>
