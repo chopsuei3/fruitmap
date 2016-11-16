@@ -2,27 +2,23 @@
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <title>FruitMap Fruit Tree Mapper</title>
+    <title>FrootShare | Add</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAS6leX7t066ObvmuqZzbfOnyiVO-t1xy4"
             type="text/javascript"></script>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
-	<script type="text/javascript">
-	var infowindow;
-	var marker;
-  var gmarkers = [];
-	
-   function toTitleCase(str)
-  {
-      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-  } 
-    
-  function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(load);
-    } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
-    }
-	}
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-87331280-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>     
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+  	<script type="text/javascript">
 		
     var customIcons = {
       orange: {
@@ -99,10 +95,13 @@
       }
     };
     
-   var centerMeIcon = 'images/findme.png';
-   var goBackIcon = 'images/goback.png';
-    
-   var fruitArray = []; 
+    var centerMeIcon = 'images/findme.png';
+    var goBackIcon = 'images/goback.png';
+    var infowindow;
+    var marker;
+    var gmarkers = [];
+
+    var fruitArray = []; 
     
    $.each(customIcons, function(key, value) {   
 //      // console.log(key);
@@ -122,7 +121,94 @@
 //                        .text(value)); 
     });
     
-    console.log(keyHtml);
+//    console.log(keyHtml);
+
+  function toTitleCase(str)
+  {
+      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+  } 
+    
+  function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(load);
+    } else {
+        x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+  }
+
+    function timeDelay() {
+      window.setTimeout(redirectToMap,1000);
+    }
+
+    function redirectToMap() {
+      window.location = "map.html";
+    }
+
+
+    function bindInfoWindow(marker, map, infowindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        // console.log("Add marker");
+        infowindow.setContent(html);
+        infowindow.open(map, marker);
+      });
+    }
+
+    function saveData() {
+      var name = escape(document.getElementById("name").value);
+      var address = escape(document.getElementById("address").value);
+      var type = document.getElementById("type").value;
+
+//      // console.log(gmarkers);
+     var lastValue = gmarkers.length - 1;
+      // console.log("Save last marker");
+//      gmarkers[lastValue].position();
+
+      var latlng = gmarkers[lastValue].getPosition();
+
+      var url = "addrecord.php?name=" + name + "&address=" + address +
+                "&type=" + type + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
+  
+      downloadUrl(url, function(data, responseCode) {
+        if (responseCode == 200) {
+          infowindow.close();
+          document.getElementById("message").innerHTML = "Location added.";
+      timeDelay();
+      }
+      });
+    }
+    
+    function deleteData() {
+      var lastValue = gmarkers.length - 1;
+      // console.log("Delete last marker");
+      gmarkers[lastValue].setMap(null);
+    }
+
+    function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+        new ActiveXObject('Microsoft.XMLHTTP') :
+        new XMLHttpRequest;
+
+//        console.log(request);
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+    }  
+  
+ /*   function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+      // console.log("Add marker");
+      infoWindow.setContent(html);
+      infoWindow.open(map, marker);
+      });
+    }
+  */
+    function doNothing() {}
 
     function load(position) {
 	  // console.log(position);
@@ -154,6 +240,8 @@
         controlText.style.lineHeight = '20px';
         controlText.style.paddingLeft = '5px';
         controlText.style.paddingRight = '5px';
+        controlText.style.margin = '7px';
+
         controlText.innerHTML = "<img style='vertical-align:middle' src='" + centerMeIcon + "'>Center map";
         controlUI.appendChild(controlText);
 
@@ -187,12 +275,13 @@
         controlText.style.lineHeight = '20px';
         controlText.style.paddingLeft = '5px';
         controlText.style.paddingRight = '5px';
+        controlText.style.margin = '7px';
         controlText.innerHTML = "<img style='vertical-align:middle' src='" + goBackIcon + "'>Go back";
         controlUI.appendChild(controlText);
 
         // Setup the click event listeners: simply set the map to Chicago.
         controlUI.addEventListener('click', function() {
-            location.href = "index.html";
+            location.href = "map.html";
 //          map.setCenter(myLatLng);
         });
 
@@ -200,63 +289,94 @@
 
 
     // console.log("Create new map...");
-      var map = new google.maps.Map(document.getElementById("map"), {
-        center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        zoom: 20,
-        mapTypeId: 'satellite',
-	    disableDefaultUI: true,
-		zoomControl: true,
-		mapTypeControl: true,
-		scaleControl: false,
-		streetViewControl: false,
-		rotateControl: false
-      });
+    var map = new google.maps.Map(document.getElementById("map"), {
+      center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+      zoom: 20,
+      mapTypeId: 'satellite',
+      disableDefaultUI: true,
+      zoomControl: true,
+      mapTypeControl: true,
+      scaleControl: false,
+      streetViewControl: false,
+      rotateControl: false
+    });
+    
 	  var html = "<table>" +
-		"<tr><td>Description</td> <td><input type='text' id='name'/> </td> </tr>" +
-		"<tr><td>Location</td> <td><input type='text' id='address'/></td> </tr>" +
-		"<tr><td>Type</td> <td><select id='type'>" +
+		"<tr><td>Description</td><td><input type='text' id='name'/></td></tr>" +
+		"<tr><td>Location</td><td><input type='text' id='address'/></td></tr>" +
+		"<tr><td>Type</td><td><select id='type'>" +
     keyHtml +
-		 "</select> </td></tr>" +
-		 "<tr><td></td><td><input type='button' value='Save & Close' onclick='saveData()'/></td><td><input type='button' value='Delete' onclick='deleteData()'/></td></tr>";
+		 "</select></td></tr>" +
+		 "<td><input type='button' value='Save & Close' onclick='saveData()'/></td><td align='right'><input type='button' value='Delete' onclick='deleteData()'/></td></tr></table>";
     infowindow = new google.maps.InfoWindow({
      content: html
     });
 
 	  map.setTilt(0);
 	
-        var centerControlDiv = document.createElement('div');
-        var centerControl = new CenterControl(centerControlDiv, map);
+    var centerControlDiv = document.createElement('div');
+    var centerControl = new CenterControl(centerControlDiv, map);
 
-        centerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(centerControlDiv);
-  
-        var mapControlDiv = document.createElement('div');
-        var mapControl = new MapControl(mapControlDiv, map);
+    centerControlDiv.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv);
 
-        mapControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(mapControlDiv);      
-  
+    var mapControlDiv = document.createElement('div');
+    var mapControl = new MapControl(mapControlDiv, map);
+
+    mapControlDiv.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(mapControlDiv);      
+
+
+    var myTitle = document.createElement('div');
+    myTitle.style.color = 'black';
+    myTitle.style.backgroundColor = '#fff';
+    myTitle.style.border = '2px solid #fff';
+    myTitle.style.borderRadius = '3px';
+//      myTitle.style.lineHeight = '7px';
+    myTitle.style.paddingLeft = '5px';
+    myTitle.style.paddingRight = '5px';
+    myTitle.style.margin = '12%';
+    
+    var myTitleText = document.createElement('div');
+
+    
+    myTitleText.style.fontFamily = 'Roboto,Arial,sans-serif';
+    myTitleText.style.fontSize = '15px';
+    myTitleText.innerHTML = '<p><b>Click on a location to place a marker and enter the type and location</b></p><p style="color: red">We do not support or approve of trespassing</p>';
+    myTitleText.style.margin = '5px';
+
+    myTitle.appendChild(myTitleText);
+
+    map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(myTitle);
+
   
   // console.log("Set marker for current location at " + position.coords.latitude + ", " + position.coords.longitude);  
-  var marker = new google.maps.Marker({
-		position: myLatLng,
-		map: map,
-		title: 'Current location',
-		label: '',
-		icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png'
-	});
+    var marker = new google.maps.Marker({
+  		position: myLatLng,
+  		map: map,
+  		title: 'Current location',
+  		label: '',
+  		icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png'
+  	});
+    
+    infowindow.setContent("<b>Current location</b><br/>");
+    bindInfoWindow(marker, map, infowindow, "<b>Current location</b><br/>");
 
 //    google.maps.event.addListener(marker, 'click', function() {
       // console.log("Add marker");
-//      infowindow.setContent("<b>Current location</b><br/>");
-//      infowindow.open(map, marker);
-//    });
-//  bindInfoWindow(marker, map, infowindow, "<b>Current location</b><br/>");
+ //     infowindow.setContent("<b>Current location</b><br/>");
+ //     infowindow.open(map, marker);
+ //   });   
+   
+    
+//    bindInfoWindow(marker, map, infowindow, "<b>Current location</b><br/>");
+
+
   
 // Display existing markers
       downloadUrl("locationstoxml.php", function(data) {
         var xml = data.responseXML;
-        console.log(xml);
+//        console.log(data);
         var markers = xml.documentElement.getElementsByTagName("marker");
         for (var i = 0; i < markers.length; i++) {
           var name = markers[i].getAttribute("name");
@@ -273,7 +393,6 @@
               parseFloat(lng));
 //          var html = "<b>" + name + "</b> <br/>" + address + "<br/><input type='button' value='Delete entry' onclick='deleteData(deleteRecord)'/>";
           var htmlxml = "<table><tr><td><b>Description</b></td><td>" + name + "</td></tr><tr><td><b>Fruit Type</b></td><td>" + capType + "</td><td><img src='" + icon.icon + "' ></td></tr><tr><td><b>Location</b></td><td>" + address + "</td></tr></table>";
-
           
           // console.log("Create marker " + i);
           var marker = new google.maps.Marker({
@@ -282,118 +401,43 @@
             icon: icon.icon
           });
 //          bindInfoWindow(marker, map, infoWindow, html, deleteRecord);
+
+          infowindow.setContent(htmlxml);
           // console.log("Bind info window");
-         // bindInfoWindow(marker, map, infoWindow, html);
+         bindInfoWindow(marker, map, infowindow, htmlxml);
          
-          google.maps.event.addListener(marker, 'click', function() {
+//          google.maps.event.addListener(marker, 'click', function() {
           // console.log("Add marker");
-          infoWindow.setContent(htmlxml);
-          infoWindow.open(map, marker);
-      });
+//          infoWindow.setContent(htmlxml);
+//          infoWindow.open(map, marker);
+//          });
 
         }
-      });
+      } );
       
-  
-  
-//    bindInfoWindow(marker, map, infoWindow, "<b>Current location</b><br/>" + lat + ", " + lng);
-	  // console.log(map);
-    
-//  gmarkers.push(marker);
-	  	  
-//    // console.log("Bind info window");
-//    bindInfoWindow(marker, map, infoWindow, html); 
-    
-//	    // This event listener calls addMarker() when the map is clicked.
-//  google.maps.event.addListener(map, 'click', function(event) {
-//           infowindow.open(map, marker);
-//    addMarker(event.latLng, map);
-//  });
-
     google.maps.event.addListener(map, "click", function(event) {
+   
         marker = new google.maps.Marker({
           position: event.latLng,
           map: map,
           icon: 'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png'
         });
-        google.maps.event.addListener(marker, "click", function() {
-          infowindow.setContent(html);
-          infowindow.open(map, marker);
-        });
+        
+        infowindow.setContent(html);
+        bindInfoWindow(marker, map, infowindow, html);
+        infowindow.open(map, marker);
+//    google.maps.event.addListener(marker, "click", function() {
+ //         infowindow.setContent(html);
+ //         bindInfoWindow(marker, map, infowindow, html);
+
+  //        infowindow.open(map, marker);
+ //       });
         // console.log(marker.position.lat() + ", " + marker.position.lng());
         gmarkers.push(marker);
 //        // console.log("Print gmarkers array");
 //        // console.log(gmarkers);
     });
-    
-//  gmarkers.push(marker);
-//  // console.log(gmarkers);
-
 }
-    function timeDelay() {
-		  window.setTimeout(redirectToMap,1000);
-		}
-
-		function redirectToMap() {
-		  window.location = "index.html";
-		}
-
-
-/*    function bindInfoWindow(marker, map, infowindow, html) {
-      google.maps.event.addListener(marker, 'click', function() {
-        // console.log("Add marker");
-        infowindow.setContent(html);
-        infowindow.open(map, marker);
-      });
-    }
-*/
-    function saveData() {
-      var name = escape(document.getElementById("name").value);
-      var address = escape(document.getElementById("address").value);
-      var type = document.getElementById("type").value;
-
-//      // console.log(gmarkers);
-     var lastValue = gmarkers.length - 1;
-      // console.log("Save last marker");
-//      gmarkers[lastValue].position();
-
-      var latlng = gmarkers[lastValue].getPosition();
-
-      var url = "addrecord.php?name=" + name + "&address=" + address +
-                "&type=" + type + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
-  
-      downloadUrl(url, function(data, responseCode) {
-        if (responseCode == 200) {
-          infowindow.close();
-          document.getElementById("message").innerHTML = "Location added.";
-		  timeDelay();
-		  }
-      });
-    }
-    
-    function deleteData() {
-      var lastValue = gmarkers.length - 1;
-      // console.log("Delete last marker");
-      gmarkers[lastValue].setMap(null);
-    }
-
-	    function downloadUrl(url, callback) {
-      var request = window.ActiveXObject ?
-          new ActiveXObject('Microsoft.XMLHTTP') :
-          new XMLHttpRequest;
-
-      request.onreadystatechange = function() {
-        if (request.readyState == 4) {
-          request.onreadystatechange = doNothing;
-          callback(request.responseText, request.status);
-        }
-      };
-
-      request.open('GET', url, true);
-      request.send(null);
-    }  
-  
-    function doNothing() {}
 
   </script>
 
@@ -401,7 +445,6 @@
 
       html,body { height: 99%; margin: 0px; padding: 5px; }
       #map { height: 99% }
-
     </style>
 
   </head>
