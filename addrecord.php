@@ -6,7 +6,7 @@ $name = $_GET['name'];
 $address = $_GET['address'];
 $lat = $_GET['lat'];
 $lng = $_GET['lng'];
-$type = $_GET['type'];
+$type = strtolower($_GET['type']);
 
 // Opens a connection to a MySQL server
 $connection=mysql_connect ($hostname, $username, $password);
