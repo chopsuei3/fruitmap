@@ -12,7 +12,7 @@ To set up the project, you  can use any webserver that can process PHP and conne
 
 
 
-Once you have everything install, make sure to get PHP curl and the MySQL connector installed - 
+Once you have everything installed, make sure to get PHP curl and the MySQL connector installed - 
 ```
 sudo apt-get update
 sudo apt-get install php5-curl php5-mysql 
@@ -23,4 +23,4 @@ The last steps are simple -
 3. Copy map.html and add.html into the folder you just created along with the PHP files.
 4. Go ahead and edit a copy of dbinfo.php.example with your variables for your database, and save the new copy as dbinfo.php into this directory
 5. You should probably set up HTTPS (the free one or self-signed will work) as most browsers stopped allowing using the geoPosition calls without SSL
-6. Now go ahead and load map.html and you should see everything loaded
+6. Now go ahead and load map.html and you should see a map with fruit icons for all records in the database
