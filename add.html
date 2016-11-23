@@ -102,6 +102,14 @@
     var gmarkers = [];
 
     var fruitArray = []; 
+    var backupLocation = false;
+    var loopCount = 1;
+    
+    var getLocationOptions = {
+//      enableHighAccuracy: true,
+      timeout: 3000
+//      maximumAge: 0
+    };
     
    $.each(customIcons, function(key, value) {   
 //      // console.log(key);
@@ -128,13 +136,33 @@
       return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   } 
     
-  function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(load);
-    } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
+    function getLocation() {
+         // console.log("Running getCurrentPosition");        
+        setTimeout(function(){
+            if (navigator.geolocation) {
+                // console.log("Location supported");
+                navigator.geolocation.getCurrentPosition(load, getLocationError,getLocationOptions);
+            } else {
+                 console.log("Geolocation function not supported");
+//                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }, 500);
+            
     }
-  }
+
+    function getLocationError(err) {
+      console.log("** ERROR ** " + err.code + " - " + err.message);
+      if(loopCount > 1) {
+        //  window.alert("We're having trouble finding your location, we'll just get you to the map to get started");
+          load();
+      }
+      else {
+        loopCount = loopCount + 1;
+      }
+      //load();
+//     navigator.geolocation.getCurrentPosition(load, getLocationError,getLocationOptions)
+    } 
+
 
     function timeDelay() {
       window.setTimeout(redirectToMap,1000);
@@ -215,7 +243,17 @@
     
     // console.log("Loading position...");
     // console.log(position);
-	  var myLatLng = {lat: position.coords.latitude, lng: position.coords.longitude};
+    if(position == null) {
+       // console.log("Backup location");
+       var myLatLng = {lat: 37.781958, lng: -122.429210};
+       backupLocation = true;
+    }
+    else {
+      console.log("Primary location");
+      var myLatLng = {lat: position.coords.latitude, lng: position.coords.longitude};
+    }
+    
+      // console.log(myLatLng);
 
       function CenterControl(controlDiv, map) {
 
@@ -287,11 +325,17 @@
 
       }
 
-
+    if (backupLocation) {
+      var mapZoomContext = 13;
+    }
+    else {
+       var mapZoomContext = 20;
+    }
+             
     // console.log("Create new map...");
     var map = new google.maps.Map(document.getElementById("map"), {
-      center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-      zoom: 20,
+      center: new google.maps.LatLng(myLatLng.lat, myLatLng.lng),
+      zoom: mapZoomContext,
       mapTypeId: 'satellite',
       disableDefaultUI: true,
       zoomControl: true,
@@ -345,9 +389,9 @@
     myTitleText.innerHTML = '<p><b>Click on a location to place a marker and enter the type and location</b></p><p style="color: red">We do not support or approve of trespassing</p>';
     myTitleText.style.margin = '5px';
 
-    myTitle.appendChild(myTitleText);
+ //   myTitle.appendChild(myTitleText);
 
-    map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(myTitle);
+ //   map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(myTitle);
 
   
   // console.log("Set marker for current location at " + position.coords.latitude + ", " + position.coords.longitude);  
